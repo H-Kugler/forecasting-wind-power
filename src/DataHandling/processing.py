@@ -25,15 +25,16 @@ def supervised_transform(
 
     shifts = range(time_steps_ahead, window_size + time_steps_ahead)
     predictors = data.columns
-    y = data[target_var]
-
+    
     for column in predictors:
         for i in shifts:
             data[f"{column} (time {-i})"] = data[column].shift(i)
 
+    data.dropna(inplace=True)
+    y = data[target_var]
     # drop columns of current timestep
     data.drop(columns=predictors, inplace=True)
-    data.dropna(inplace=True)
+    
 
     return data, y
 
