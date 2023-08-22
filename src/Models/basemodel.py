@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 import pandas as pd
 from typing import Literal
 
+from src.DataHandling.processing import supervised_transform
+
 
 class Basemodel(ABC):
     TS_10MIN = 1
@@ -33,13 +35,19 @@ class Basemodel(ABC):
             raise ValueError("Invalid horizon: " + horizon)
         self.window_size = window_size
 
-    @abstractmethod
     def fit(self, test_start, test_end):
         """
         Fits the model to the given data.
-        :param data: The data to fit the model to
+        :param test_start: The start of the test set
+        :param test_end: The end of the test set
         """
-        pass
+        X, y = supervised_transform(
+            df=self.data,
+            time_steps_ahead=self.time_steps_ahead,
+            window_size=self.window_size,
+        )
+        self.X_test = X.loc[test_start:test_end]
+        self.y_test = y.loc[test_start:test_end]
 
     @abstractmethod
     def predict(self):
