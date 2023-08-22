@@ -60,3 +60,16 @@ def plot_corr_of_vars(columns:Union[Tuple[str, str], List[Tuple[str, str]]], dat
     if save_path is not None:
         plt.savefig(save_path)
     plt.show()
+
+def barplot_errors(df: pd.DataFrame, models: List[str], save_path:str=None):
+    """
+    Plots the error of a model.
+    :param df: Dataframe containing the error
+    :param models: List of models to plot
+    :param save_path: Path to save the plot
+    """
+    df_plot = pd.melt(df, id_vars=['Metric', 'Horizon'], value_vars=models, var_name='Model', value_name='Error')
+    sns.catplot(x='Metric', y='Error', hue='Model', col='Horizon', data=df_plot, kind='bar', palette='muted')
+    if save_path is not None:
+        plt.savefig(save_path)
+    plt.show()
