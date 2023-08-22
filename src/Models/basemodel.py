@@ -46,6 +46,8 @@ class Basemodel(ABC):
             time_steps_ahead=self.time_steps_ahead,
             window_size=self.window_size,
         )
+        self.X_train = X.loc[:test_start]
+        self.y_train = y.loc[:test_start]
         self.X_test = X.loc[test_start:test_end]
         self.y_test = y.loc[test_start:test_end]
 

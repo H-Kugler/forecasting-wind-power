@@ -1,37 +1,58 @@
-import numpy as np
+from typing import Literal
 import pandas as pd
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Lasso
 from sklearn.kernel_ridge import KernelRidge
 
-from basemodel import Basemodel
-from src.DataHandling.processing import supervised_transform
+from src.Models.basemodel import Basemodel
 
 
 class Regression(Basemodel):
-    def __init__(self, lambda_, time_steps_ahead=1, window_size=1):
-        self.name = "Ridge Regression"
-        self.model = Ridge(alpha=lambda_)
-        self.time_steps_ahead = time_steps_ahead
-        self.window_size = window_size
-
-    def fit(self, X, y):
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        horizon: Literal["10min", "Hourly", "Daily"],
+        window_size: int,
+        model: Literal["linear", "ridge", "lasso", "kernelridge"],
+        alpha: float = 1.0,
+        gamma: float = 1.0,
+    ):
         """
-        Fits the model to the given data
-        :param X: The data to fit on
-        :param y: The target values
-        :return: None
+        Initializes the model.
+        :param data: The data to fit the model to
+        :param horizon: The horizon to predict on
+        :param window_size: The number of time steps into the past to use for prediction
+        :param model: model type
+        :param alpha: regularization parameter
+        :param gamma: kernel coefficient
         """
-        X, y = supervised_transform(X, y, self.time_steps_ahead, self.window_size)
-        self.model.fit(X, y)
+        super().__init__(data, horizon, window_size)
+        if model == "linear":
+            self.model = LinearRegression()
+        elif model == "ridge":
+            self.model = Ridge(alpha=alpha)
+        elif model == "lasso":
+            self.model = Lasso(alpha=alpha)
+        elif model == "kernelridge":
+            self.model = KernelRidge(alpha=alpha, gamma=gamma)
+        else:
+            raise ValueError("Invalid model type: " + model)
 
-    def predict(self, X):
+    def fit(self, test_start, test_end):
+        """
+        Fits the model to the given data.
+        :param test_start: The start of the test set
+        :param test_end: The end of the test set
+        """
+        super().fit(test_start, test_end)
+        self.model.fit(self.X_train, self.y_train)
+        self.coef_ = self.model.coef_
+
+    def predict(self):
         """
         Predicts the next Power output for the given data time_steps_ahead into the future.
-        :param X: The data to predict on
-        :param time_steps_ahead: The number of time steps into the future to predict
-        :return: A list of predictions
+        :return: A list-like object of predictions
         """
-        X, _ = supervised_transform(X, pd.Series(np.zeros(len(X))), self.time_steps_ahead, self.window_size)
-        return self.model.predict(X)
+        predictions = self.model.predict(self.X_test)
+        return predictions
