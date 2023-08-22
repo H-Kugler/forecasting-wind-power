@@ -25,7 +25,7 @@ def supervised_transform(
 
     shifts = range(time_steps_ahead, window_size + time_steps_ahead)
     predictors = data.columns
-    
+
     for column in predictors:
         for i in shifts:
             data[f"{column} (time {-i})"] = data[column].shift(i)
@@ -34,9 +34,9 @@ def supervised_transform(
     y = data[target_var]
     # drop columns of current timestep
     data.drop(columns=predictors, inplace=True)
-    
 
     return data, y
+
 
 # def encode_time(turbine:pd.DataFrame) -> pd.DataFrame:
 #     """Encode time features of a turbine."""
@@ -49,6 +49,7 @@ def supervised_transform(
 #     turbine_encoded.drop(['month',  'hour'], axis=1, inplace=True)
 #     return turbine_encoded
 
+
 def remove_nans(turbine: pd.DataFrame) -> pd.DataFrame:
     """
     Removes NaNs from the data.
@@ -57,16 +58,18 @@ def remove_nans(turbine: pd.DataFrame) -> pd.DataFrame:
     """
     for column in turbine.columns:
         turbine = remove_nans_bae(turbine, column)
-    turbine.interpolate(method='linear', inplace=True)
-    turbine.fillna(method='bfill', inplace=True)
-    turbine.fillna(method='ffill', inplace=True)
+    turbine.interpolate(method="linear", inplace=True)
+    turbine.fillna(method="bfill", inplace=True)
+    turbine.fillna(method="ffill", inplace=True)
 
     assert turbine.isna().sum().sum() == 0, "There are still NaNs in the data."
 
     return turbine
 
 
-def remove_nans_bae(turbine: pd.DataFrame, variable: str, verbose: bool = False) -> pd.DataFrame:
+def remove_nans_bae(
+    turbine: pd.DataFrame, variable: str, verbose: bool = False
+) -> pd.DataFrame:
     """
     Removes rows NaNs in variable at the beginning and end of a time series.
     :param turbine: The turbine data
@@ -80,19 +83,25 @@ def remove_nans_bae(turbine: pd.DataFrame, variable: str, verbose: bool = False)
             continue
         else:
             if verbose:
-                print(f'This is the first row with a positive value in the target variable {variable}:', i)
+                print(
+                    f"This is the first row with a positive value in the target variable {variable}:",
+                    i,
+                )
             first_valid_row = i
             break
 
     # do the same for the end of the dataset
     last_valid_row = 0
-    for i in range(len(turbine)-1, 0, -1):
+    for i in range(len(turbine) - 1, 0, -1):
         if np.isnan(turbine[variable][i]) or turbine[variable][i] <= 0:
             continue
         else:
             if verbose:
-                print(f'This is the last row with a positive value in the target variable {variable}:', i)
+                print(
+                    f"This is the last row with a positive value in the target variable {variable}:",
+                    i,
+                )
             last_valid_row = i
             break
-    
-    return turbine.iloc[first_valid_row:last_valid_row+1, :]
+
+    return turbine.iloc[first_valid_row : last_valid_row + 1, :]
