@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import xarray as xr
 from typing import Literal
 
@@ -7,12 +6,14 @@ from typing import Literal
 class DataLoader:
     """
     Class to load the data.
-    Links: - 
-           - 
+    Links: - British: https://zenodo.org/record/5841834#.ZEajKXbP2BQ
+           - Brazilian: https://zenodo.org/record/1475197#.ZD6iMxXP2WC
     """
 
     @classmethod
-    def load_data(cls, turbine_id: int, which_data: Literal["British", "Brazilian"]) -> pd.DataFrame:
+    def load_data(
+        cls, turbine_id: int, which_data: Literal["British", "Brazilian"]
+    ) -> pd.DataFrame:
         """
         Load data from a single turbine.
         :param turbine_id: ID of the turbine to load
@@ -91,7 +92,6 @@ class DataLoader:
 
         return turbine
 
-
     @staticmethod
     def _load_brazilian_data(turbine_id: int = 2) -> pd.DataFrame:
         """
@@ -99,7 +99,13 @@ class DataLoader:
         :param turbine_id: ID of the turbine to load
         :return: pd.DataFrame with the data of the turbine
         """
-        data = xr.load_dataset('../data/Brazilian/UEBB_v1.nc').sel(Turbine=turbine_id).to_dataframe()
+        data = (
+            xr.load_dataset("../data/Brazilian/UEBB_v1.nc")
+            .sel(Turbine=turbine_id)
+            .to_dataframe()
+        )
 
-        # TODO: restructure dataframe
+        data = data.loc[data.index.get_level_values("Height") == 100]
+        data = data.reset_index(level="Height", drop=True)
+        data = data.drop(columns=["Turbine"])
         return data

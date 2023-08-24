@@ -73,3 +73,21 @@ def barplot_errors(df: pd.DataFrame, models: List[str], save_path:str=None):
     if save_path is not None:
         plt.savefig(save_path)
     plt.show()
+
+def correlationplot(df: pd.DataFrame, save_path:str=None):
+    """
+    Plots the correlation of a dataframe.
+    :param df: Dataframe to plot
+    :param save_path: Path to save the plot
+    """
+    corr = df.corr()
+    mask = np.zeros_like(corr)
+    mask[np.triu_indices_from(mask)] = True
+    with sns.axes_style("white"):
+        fig, ax = plt.subplots(figsize=(15, 15))
+        ax = sns.heatmap(corr, mask=mask, vmax=.3, square=True, annot=True, cmap='Blues')
+        ax.set_title('Correlation Matrix')
+    if save_path is not None:
+        plt.savefig(save_path)
+    plt.show()
+
