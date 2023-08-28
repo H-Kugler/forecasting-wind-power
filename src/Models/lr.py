@@ -1,9 +1,8 @@
 from typing import Literal
 import pandas as pd
-from sklearn.linear_model import Ridge
-from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import Lasso
+from sklearn.linear_model import Ridge, Lasso, LinearRegression
 from sklearn.kernel_ridge import KernelRidge
+from sklearn.metrics import mean_squared_error, median_absolute_error
 
 from src.Models.basemodel import Basemodel
 
@@ -56,3 +55,35 @@ class Regression(Basemodel):
         """
         predictions = self.model.predict(self.X_test)
         return predictions
+    
+    @classmethod
+    def evaluate_model_(
+        cls,
+        datasets: dict,
+        test_dates: dict,
+        results: dict
+    ):
+        """
+        Evaluates the model on the given datasets.
+        :param datasets: A dictionary of datasets to evaluate on
+        :param test_dates: A dictionary of test dates to evaluate on
+        :param results: A dictionary of results to store the results in
+        """
+        for model_name in ["linear", "ridge", "lasso"]:
+            for dataset_name, dataset in datasets.items():
+                for (metric, horizon, window_size), _ in results[dataset_name].iterrows():
+                    model = cls(
+                        data=dataset,
+                        horizon=horizon,
+                        window_size=window_size,
+                        model=model_name
+                    )
+                    model.fit(
+                        test_start=test_dates[dataset_name][0],
+                        test_end=test_dates[dataset_name][1]
+                    )
+                    y_pred = model.predict()
+                    y_true = model.y_test
+                    rmse = mean_squared_error(y_true, y_pred, squared=False)
+                    mae = median_absolute_error(y_true, y_pred)
+                    results[dataset_name].loc[(metric, horizon, window_size), model_name] = rmse if metric == "RMSE" else mae

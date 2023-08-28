@@ -108,4 +108,9 @@ class DataLoader:
         data = data.loc[data.index.get_level_values("Height") == 100]
         data = data.reset_index(level="Height", drop=True)
         data = data.drop(columns=["Turbine"])
+
+        # Convert to datetime and set time as index
+        data.index = pd.to_datetime(data.index)
+        data.index.name = "Date"
+        
         return data
