@@ -31,7 +31,6 @@ class MovingAverage(Basemodel):
                 )
             ]
         ]
-        
 
     def predict(self):
         """
@@ -40,6 +39,6 @@ class MovingAverage(Basemodel):
         """
         if self.X_test is None:
             raise ValueError("Model has not been fitted yet.")
-        discounts = np.array([self.discount ** i for i in range(self.window_size)])
+        discounts = np.array([self.discount**i for i in range(self.window_size)])
         predictions = self.X_test.multiply(discounts).sum(axis=1).div(discounts.sum())
         return predictions.to_numpy()

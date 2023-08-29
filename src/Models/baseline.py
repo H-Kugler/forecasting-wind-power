@@ -47,6 +47,10 @@ class Baseline(Basemodel):
         :param test_dates: A dictionary of test dates to evaluate on
         :param results: A dictionary of results to store the results in
         """
+        # check if keys are the same for all dictionaries
+        if not all(datasets.keys() == test_dates.keys()) or not all(datasets.keys() == results.keys()):
+            raise ValueError("Keys of datasets, test_dates and results must be the same.")
+        
         for dataset_name, dataset in datasets.items():
             for (metric, horizon, window_size), _ in results[dataset_name].iterrows():
                 model = cls(

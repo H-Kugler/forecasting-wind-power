@@ -1,7 +1,7 @@
 from typing import Literal
 import pandas as pd
 from sklearn.linear_model import Ridge, Lasso, LinearRegression
-from sklearn.kernel_ridge import KernelRidge
+
 from sklearn.metrics import mean_squared_error, median_absolute_error
 
 from src.Models.basemodel import Basemodel
@@ -13,9 +13,8 @@ class Regression(Basemodel):
         data: pd.DataFrame,
         horizon: Literal["10min", "Hourly", "Daily"],
         window_size: int,
-        model: Literal["linear", "ridge", "lasso", "kernelridge"],
+        model: Literal["linear", "ridge", "lasso"],
         alpha: float = 1.0,
-        gamma: float = 1.0,
     ):
         """
         Initializes the model.
@@ -24,7 +23,6 @@ class Regression(Basemodel):
         :param window_size: The number of time steps into the past to use for prediction
         :param model: model type
         :param alpha: regularization parameter
-        :param gamma: kernel coefficient
         """
         super().__init__(data, horizon, window_size)
         if model == "linear":
@@ -33,8 +31,6 @@ class Regression(Basemodel):
             self.model = Ridge(alpha=alpha)
         elif model == "lasso":
             self.model = Lasso(alpha=alpha)
-        elif model == "kernelridge":
-            self.model = KernelRidge(alpha=alpha, gamma=gamma)
         else:
             raise ValueError("Invalid model type: " + model)
 
@@ -55,35 +51,42 @@ class Regression(Basemodel):
         """
         predictions = self.model.predict(self.X_test)
         return predictions
-    
+
     @classmethod
-    def evaluate_model_(
-        cls,
-        datasets: dict,
-        test_dates: dict,
-        results: dict
-    ):
+    def evaluate_model_(cls, datasets: dict, test_dates: dict, results: dict):
         """
         Evaluates the model on the given datasets.
         :param datasets: A dictionary of datasets to evaluate on
         :param test_dates: A dictionary of test dates to evaluate on
         :param results: A dictionary of results to store the results in
         """
+        # check if keys are the same for all dictionaries
+        if not all(datasets.keys() == test_dates.keys()) or not all(
+            datasets.keys() == results.keys()
+        ):
+            raise ValueError(
+                "Keys of datasets, test_dates and results must be the same."
+            )
+
         for model_name in ["linear", "ridge", "lasso"]:
             for dataset_name, dataset in datasets.items():
-                for (metric, horizon, window_size), _ in results[dataset_name].iterrows():
+                for (metric, horizon, window_size), _ in results[
+                    dataset_name
+                ].iterrows():
                     model = cls(
                         data=dataset,
                         horizon=horizon,
                         window_size=window_size,
-                        model=model_name
+                        model=model_name,
                     )
                     model.fit(
                         test_start=test_dates[dataset_name][0],
-                        test_end=test_dates[dataset_name][1]
+                        test_end=test_dates[dataset_name][1],
                     )
                     y_pred = model.predict()
                     y_true = model.y_test
                     rmse = mean_squared_error(y_true, y_pred, squared=False)
                     mae = median_absolute_error(y_true, y_pred)
-                    results[dataset_name].loc[(metric, horizon, window_size), model_name] = rmse if metric == "RMSE" else mae
+                    results[dataset_name].loc[
+                        (metric, horizon, window_size), model_name
+                    ] = (rmse if metric == "RMSE" else mae)
