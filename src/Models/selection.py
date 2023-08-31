@@ -4,7 +4,7 @@ from sklearn.model_selection import ParameterGrid
 from sklearn.pipeline import Pipeline
 
 from src.Models.basemodel import Basemodel
-
+from src.utils import sort_dict
 
 class GridSearch:
     def __init__(self, model: Union[Pipeline, Basemodel], param_grid: dict):
@@ -15,8 +15,8 @@ class GridSearch:
         :param refit: Whether to refit the best model on the whole data
         """
         self.model = model
-        self.param_grid = param_grid
-        self.grid = ParameterGrid(param_grid)
+        self.param_grid = sort_dict(param_grid)
+        self.grid = ParameterGrid(self.param_grid)
         self.best_params = None
         self.best_score = None
         self.best_model = None
@@ -38,19 +38,28 @@ class GridSearch:
         :param y_test: The test labels
         :param refit: Whether to refit the best model
         """
-        results = {"Params": [], "RMSE": [], "MAE": []}
+
+        # create results dataframe
+        index = pd.MultiIndex.from_product(
+            iterables=list(self.param_grid.values()),
+            names=list(self.param_grid.keys()),
+        )
+        results = pd.DataFrame(index=index, columns=["RMSE", "MAE"]).sort_index()
         for params in self.grid:
             self.model.set_params(**params)
             self.model.fit(X_train, y_train)
             rmse, mae = self.model.score(X_test, y_test)
-            results["Params"].append(params)
-            results["RMSE"].append(rmse)
-            results["MAE"].append(mae)
+            results.loc[tuple(params.values()), "RMSE"] = rmse
+            results.loc[tuple(params.values()), "MAE"] = mae
 
-        results = pd.DataFrame(data=results)
+        # cast type of RMSE and MAE to float 
+        results["RMSE"] = results["RMSE"].astype(float)
+        results["MAE"] = results["MAE"].astype(float)    
+
         self.results = results
-        self.best_params = results.loc[results["RMSE"].idxmin(), "Params"]
-        self.best_score = results.loc[results["RMSE"].idxmin(), "RMSE"]
+        best_params = results["RMSE"].idxmin()
+        self.best_score = results.loc[best_params, "RMSE"]
+        self.best_params = dict(zip(self.param_grid.keys(), best_params))
         self.best_model = self.model.set_params(**self.best_params)
         if refit:
             self.best_model.fit(X_train, y_train)

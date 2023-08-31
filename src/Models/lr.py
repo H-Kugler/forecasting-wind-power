@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 import pandas as pd
 from sklearn.linear_model import Ridge, Lasso, LinearRegression
 
@@ -10,83 +10,53 @@ from src.Models.basemodel import Basemodel
 class Regression(Basemodel):
     def __init__(
         self,
-        data: pd.DataFrame,
-        horizon: Literal["10min", "Hourly", "Daily"],
-        window_size: int,
-        model: Literal["linear", "ridge", "lasso"],
+        model: Literal["linear", "ridge", "lasso"] = "linear",
         alpha: float = 1.0,
     ):
         """
         Initializes the model.
-        :param data: The data to fit the model to
-        :param horizon: The horizon to predict on
-        :param window_size: The number of time steps into the past to use for prediction
         :param model: model type
-        :param alpha: regularization parameter
+        :param alpha: regularization parameter - useless for model = "linear"
         """
-        super().__init__(data, horizon, window_size)
-        if model == "linear":
-            self.model = LinearRegression()
-        elif model == "ridge":
-            self.model = Ridge(alpha=alpha)
-        elif model == "lasso":
-            self.model = Lasso(alpha=alpha)
-        else:
-            raise ValueError("Invalid model type: " + model)
+        self.model = model
+        self.name = model
+        self.alpha = alpha
+        
 
-    def fit(self, test_start, test_end):
+    def fit(self, X, y):
         """
         Fits the model to the given data.
         :param test_start: The start of the test set
         :param test_end: The end of the test set
         """
-        super().fit(test_start, test_end)
-        self.model.fit(self.X_train, self.y_train)
-        self.coef_ = self.model.coef_
+        n_samples = X.shape[0]
+        y = y.iloc[-n_samples:]
+        # check if indices match
+        assert X.index.equals(y.index), "Indices of X and y do not match."
 
-    def predict(self):
+        self.model.fit(X, y)
+        return self
+
+    def predict(self, X):
         """
         Predicts the next Power output for the given data time_steps_ahead into the future.
         :return: A list-like object of predictions
         """
-        predictions = self.model.predict(self.X_test)
+        predictions = self.model.predict(X)
         return predictions
-
-    @classmethod
-    def evaluate_model_(cls, datasets: dict, test_dates: dict, results: dict):
-        """
-        Evaluates the model on the given datasets.
-        :param datasets: A dictionary of datasets to evaluate on
-        :param test_dates: A dictionary of test dates to evaluate on
-        :param results: A dictionary of results to store the results in
-        """
-        # check if keys are the same for all dictionaries
-        if not all(datasets.keys() == test_dates.keys()) or not all(
-            datasets.keys() == results.keys()
-        ):
-            raise ValueError(
-                "Keys of datasets, test_dates and results must be the same."
-            )
-
-        for model_name in ["linear", "ridge", "lasso"]:
-            for dataset_name, dataset in datasets.items():
-                for (metric, horizon, window_size), _ in results[
-                    dataset_name
-                ].iterrows():
-                    model = cls(
-                        data=dataset,
-                        horizon=horizon,
-                        window_size=window_size,
-                        model=model_name,
-                    )
-                    model.fit(
-                        test_start=test_dates[dataset_name][0],
-                        test_end=test_dates[dataset_name][1],
-                    )
-                    y_pred = model.predict()
-                    y_true = model.y_test
-                    rmse = mean_squared_error(y_true, y_pred, squared=False)
-                    mae = median_absolute_error(y_true, y_pred)
-                    results[dataset_name].loc[
-                        (metric, horizon, window_size), model_name
-                    ] = (rmse if metric == "RMSE" else mae)
+    
+    def __setattr__(self, __name: str, __value: Any) -> None:
+        if __name == "model":
+            if __value == "linear":
+                super().__setattr__(__name, LinearRegression())
+            elif __value == "ridge":
+                super().__setattr__(__name, Ridge())
+            elif __value == "lasso":
+                super().__setattr__(__name, Lasso())
+            else:
+                raise ValueError("Invalid model type: " + __value)
+        elif __name == "alpha" and self.name != "linear":
+            self.model.set_params(alpha=__value)
+            super().__setattr__(__name, __value)
+        else:
+            super().__setattr__(__name, __value)
