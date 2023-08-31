@@ -1,6 +1,5 @@
 import pandas as pd
-import numpy as np
-from typing import Literal, Union, List, Tuple
+from typing import Union
 from sklearn.model_selection import ParameterGrid
 from sklearn.pipeline import Pipeline
 
@@ -31,9 +30,16 @@ class GridSearch:
         y_test: pd.DataFrame,
         refit: bool = True,
     ):
+        """
+        Performs a grid search over the given parameter.
+        :param X_train: The training data
+        :param y_train: The training labels
+        :param X_test: The test data
+        :param y_test: The test labels
+        :param refit: Whether to refit the best model
+        """
         results = {"Params": [], "RMSE": [], "MAE": []}
         for params in self.grid:
-            print(params)
             self.model.set_params(**params)
             self.model.fit(X_train, y_train)
             rmse, mae = self.model.score(X_test, y_test)
