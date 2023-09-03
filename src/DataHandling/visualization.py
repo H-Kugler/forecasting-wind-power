@@ -138,3 +138,14 @@ def plot_corr_matrix(data, features):
 def scatter_plot(data, features):
     sns.pairplot(data[features], plot_kws={"s": 3})
     plt.show()
+
+def plot_gridsearch(results_df: pd.DataFrame, hue="Model__discount", col="st__horizon", row="st__window_size"):
+    """
+    Plots the results of a grid search. 
+    """
+    idx = results_df.index.names
+    df = results_df.reset_index()
+    df = df.melt(id_vars=idx, value_vars=["RMSE", "MAE"], var_name="Metric", value_name="Score")
+    sns.catplot(data=df, x="Metric", y="Score", hue=hue, col=col, row=row, kind="bar")
+    plt.show()
+

@@ -20,8 +20,10 @@ def load_data(
     """
     if which_data == "British":
         return _load_british_data(turbine_id)
-    else:
+    elif which_data == "Brazilian":
         return _load_brazilian_data(turbine_id)
+    else:
+        raise ValueError("which_data must be 'British' or 'Brazilian'")
 
 
 def _load_british_data(turbine_id: int = 2) -> pd.DataFrame:

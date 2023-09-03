@@ -257,9 +257,31 @@ class DataCleaner(BaseEstimator, TransformerMixin):
         return X
 
 
-class Scaler(StandardScaler):
+class Normalizer(StandardScaler):
     """
-    Scales the given data.
+    Overwrites the transform function of the StandardScaler from sklearn to allow for to 
+    keep the index and column names after scaling. Additionally, it allows for no scaling at all such that 
+    the effects of the transformation can be studied in a pipeline.
     """
 
-    pass  # TODO: implement
+    def __init__(self, scale: bool = True):
+        """
+        Initializes the transformer.
+        :param scale: Whether to scale the data
+        """
+        self.scale = scale
+        super().__init__()
+
+    def transform(self, X: pd.DataFrame):
+        """
+        Transforms the given data.
+        :param X: The data to transform
+        :return: The transformed data
+        """
+        if self.scale:
+            X = pd.DataFrame(
+                super().transform(X), index=X.index, columns=X.columns
+            )
+            return X
+        else:
+            return X # return unchanged data

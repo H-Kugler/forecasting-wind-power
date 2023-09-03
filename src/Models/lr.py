@@ -46,7 +46,7 @@ class Regression(Basemodel):
         return predictions
     
     def __setattr__(self, __name: str, __value: Any) -> None:
-        if __name == "model":
+        if __name == "model" and isinstance(__value, str):
             if __value == "linear":
                 super().__setattr__(__name, LinearRegression())
             elif __value == "ridge":
@@ -55,7 +55,7 @@ class Regression(Basemodel):
                 super().__setattr__(__name, Lasso())
             else:
                 raise ValueError("Invalid model type: " + __value)
-        elif __name == "alpha" and self.name != "linear":
+        elif __name == "alpha" and self.name != "linear" and isinstance(self.name, str):
             self.model.set_params(alpha=__value)
             super().__setattr__(__name, __value)
         else:

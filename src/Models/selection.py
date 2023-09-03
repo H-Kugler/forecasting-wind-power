@@ -2,11 +2,14 @@ import pandas as pd
 from typing import Union
 from sklearn.model_selection import ParameterGrid
 from sklearn.pipeline import Pipeline
+from sklearn.base import clone
 
 from src.Models.basemodel import Basemodel
 from src.utils import sort_dict
 
+
 class GridSearch:
+
     def __init__(self, model: Union[Pipeline, Basemodel], param_grid: dict):
         """
         Initializes the GridSearch object.
@@ -19,7 +22,7 @@ class GridSearch:
         self.grid = ParameterGrid(self.param_grid)
         self.best_params = None
         self.best_score = None
-        self.best_model = None
+        self.best_models = None
         self.results = None
 
     def fit(
@@ -44,7 +47,9 @@ class GridSearch:
             iterables=list(self.param_grid.values()),
             names=list(self.param_grid.keys()),
         )
-        results = pd.DataFrame(index=index, columns=["RMSE", "MAE"]).sort_index()
+        results = pd.DataFrame(
+            index=index, columns=["RMSE", "MAE"], dtype=float
+        ).sort_index()
         for params in self.grid:
             self.model.set_params(**params)
             self.model.fit(X_train, y_train)
@@ -52,14 +57,13 @@ class GridSearch:
             results.loc[tuple(params.values()), "RMSE"] = rmse
             results.loc[tuple(params.values()), "MAE"] = mae
 
-        # cast type of RMSE and MAE to float 
-        results["RMSE"] = results["RMSE"].astype(float)
-        results["MAE"] = results["MAE"].astype(float)    
-
         self.results = results
-        best_params = results["RMSE"].idxmin()
-        self.best_score = results.loc[best_params, "RMSE"]
-        self.best_params = dict(zip(self.param_grid.keys(), best_params))
-        self.best_model = self.model.set_params(**self.best_params)
-        if refit:
-            self.best_model.fit(X_train, y_train)
+        self.best_params = self.results["RMSE"].groupby(level="st__horizon").idxmin()
+        self.best_score = results.loc[self.best_params, "RMSE"]
+        self.best_models = []
+        for params in self.best_params:
+            model = clone(self.model.set_params(**dict(zip(self.param_grid.keys(), params))))
+            if refit:
+                model.fit(X_train, y_train)
+            self.best_models.append(model)
+        
