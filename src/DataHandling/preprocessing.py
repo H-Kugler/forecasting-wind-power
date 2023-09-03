@@ -1,20 +1,17 @@
-from numpy import ndarray
+import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import StandardScaler
-
-import pandas as pd
-import numpy as np
 from typing import Literal, Union, List, Tuple
 
 
 def train_test_split(
-    test_start: str, test_end: str, df: pd.DataFrame, target_var: str
+    df: pd.DataFrame, test_start: str, test_end: str, target_var: str
 ) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
     """
     Splits the given data into train and test set.
+    :param df: The data to split
     :param test_start: The start of the test set - has to be a string parsable by pd.to_datetime
     :param test_end: The end of the test set - has to be a string parsable by pd.to_datetime
-    :param df: The data to split
     :return: The train and test set
     """
     test_start = pd.to_datetime(test_start)
@@ -157,73 +154,47 @@ class SupervisedTransformer(BaseEstimator, TransformerMixin):
 class DataCleaner(BaseEstimator, TransformerMixin):
     """
     Cleans the given data.
-    Essentially, this transformer performs all steps that are described in the data inspection notebook.
+    Essentially, this transformer can perform all steps
+    that are described in the data inspection notebook.
     """
 
-    def __init__(self, verbose: bool = False):
+    def __init__(
+        self,
+        verbose: bool = False,
+        features: Union[Literal["auto"], List[str]] = "auto",
+        rename_features: Union[Literal[False], List[str]] = False,
+        remove_nans: bool = True,
+    ):
         """
         Initializes the transformer.
-        :param verbose: Whether to print information about the NaNs
+        :param verbose: Whether to print information about the cleaning process
+        :param features: The features to clean
         """
         self.verbose = verbose
+        self.features = features
+        self.rename_features = rename_features
+        self.remove_nans = remove_nans
 
-    def _reset(self):
+    def fit(self, X: pd.DataFrame, y: pd.Series = None):
         """
-        Resets the transformer.
+        This function is called when the transformer is fitted to the data. In this case, it does nothing
+        but it is needed for compatibility with sklearn pipelines.
+        :param X: The data to fit the transformer to
+        :param y: The target variable
+        :return: self
         """
-        if hasattr(self, "features"):
-            del self.features
-        if hasattr(self, "target_var"):
-            del self.target_var
-
-    def fit(self, X: pd.DataFrame, y: pd.Series = None, features: List[str] = None):
-        """
-        Fits the transformer to the given data.
-        X: The data to fit the transformer to
-        """
-        # check if features are columns in data frame
-        self._reset()
-
-        if features is not None:
-            assert all(
-                feature in X.columns for feature in features
-            ), "Features not in data. Please select features from: " + str(X.columns)
-            self.features = features
-        else:
-            self.features = X.columns
-
-        if y is not None:
-            self.target_var = y.name
-
-        ### TODO: Perform further sanity checks on the data ? ###
-
         return self
 
-    def transform(
-        self, X: pd.DataFrame, y: pd.Series = None, renamed_features: List[str] = None
-    ):
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         """
         Cleans the given data.
         :param X: The data to clean
         :return: The cleaned data
         """
-        # check if features are columns in data frame
-        assert all(
-            feature in X.columns for feature in self.features
-        ), "Features not in data. Please select valid data or fit the transformer first."
-
-        X = X[self.features]
-
-        if renamed_features is not None:
-            assert len(self.features) == len(
-                renamed_features
-            ), "Number of features and number of renamed features must be equal."
-            X.columns = renamed_features
-            self.features = renamed_features
-
-        # append
-
-        return self._clean_data(X)
+        X = X.copy()
+        X = self._select_features(X)
+        X = self._clean_data(X)
+        return X
 
     def _clean_data(self, X: pd.DataFrame) -> pd.DataFrame:
         """
@@ -231,12 +202,59 @@ class DataCleaner(BaseEstimator, TransformerMixin):
         :param X: The data to clean
         :return: The cleaned data
         """
-        # Eliminate columns with to many nans (e.g. 50%)
-        if not hasattr(self, "features"):
-            X.dropna(axis=1, thresh=0.5 * X.shape[0], inplace=True)
-            self.features = X.columns
+        if self.remove_nans:
+            X = self._remove_nans(X, interpolation="linear")
+        if isinstance(self.rename_features, list):
+            X = self._rename_columns(X, self.rename_features)
+        return X
 
-        pass
+    def _remove_nans(
+        self, X: pd.DataFrame, interpolation: str = "linear"
+    ) -> pd.DataFrame:
+        """
+        Removes NaNs from the given data.
+        :param X: The data to remove NaNs from
+        :param interpolation: The interpolation method to use
+        :return: The data without NaNs
+        """
+        X = X.interpolate(method=interpolation)
+        X.dropna(inplace=True)
+        return X
+
+    def _select_features(self, X: pd.DataFrame, thresh: float = 0.7) -> pd.DataFrame:
+        """
+        Selects the features to clean.
+        :param X: The data to select the features from
+        :return: Dataframe with the selected features
+        """
+        assert self._check_features(
+            X
+        ), "Features not in data. Please select valid data."
+        if self.features == "auto":
+            self.features = X.columns[X.isna().sum() < thresh * X.shape[0]]
+        return X[self.features]
+
+    def _check_features(self, X: pd.DataFrame) -> bool:
+        """
+        Checks if the features are in the given data.
+        :param X: The data to check
+        """
+        return all(feature in X.columns for feature in self.features)
+
+    def _rename_columns(
+        self, X: pd.DataFrame, renamed_features: List[str]
+    ) -> pd.DataFrame:
+        """
+        Renames the columns of the given data.
+        :param X: The data to rename
+        :param renamed_features: The new names of the features
+        :return: The renamed data
+        """
+        assert len(self.features) == len(
+            renamed_features
+        ), "Number of features and number of renamed features must be equal."
+        X.columns = renamed_features
+        return X
 
 
 class Scaler(StandardScaler):
@@ -244,18 +262,4 @@ class Scaler(StandardScaler):
     Scales the given data.
     """
 
-    def fit(
-        self,
-        X,
-        y = None,
-        sample_weight=None,
-    ):
-        return super().fit(X, y, sample_weight)
-
-    def transform(
-        X,
-        y = None,
-        copy: bool = True,
-    ):
-        # TODO: Implement this method
-        pass
+    pass  # TODO: implement
