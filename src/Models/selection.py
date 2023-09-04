@@ -77,7 +77,7 @@ class GridSearch:
         """
         self.results = results
         self.best_params = self.results["RMSE"].groupby(level="st__horizon").idxmin()
-        self.best_score = self.esults.loc[self.best_params, "RMSE"]
+        self.best_score = self.results.loc[self.best_params, "RMSE"]
         self.best_models = []
         for params in self.best_params:
             model = clone(
