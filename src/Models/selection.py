@@ -9,7 +9,6 @@ from src.utils import sort_dict
 
 
 class GridSearch:
-
     def __init__(self, model: Union[Pipeline, Basemodel], param_grid: dict):
         """
         Initializes the GridSearch object.
@@ -42,7 +41,6 @@ class GridSearch:
         :param y_test: The test labels
         :param refit: Whether to refit the best model
         """
-
         # create results dataframe
         index = pd.MultiIndex.from_product(
             iterables=list(self.param_grid.values()),
@@ -62,11 +60,27 @@ class GridSearch:
 
         self.results = results
         self.best_params = self.results["RMSE"].groupby(level="st__horizon").idxmin()
-        self.best_score = results.loc[self.best_params, "RMSE"]
+        self.best_score = self.results.loc[self.best_params, "RMSE"]
         self.best_models = []
         for params in self.best_params:
-            model = clone(self.model.set_params(**dict(zip(self.param_grid.keys(), params))))
+            model = clone(
+                self.model.set_params(**dict(zip(self.param_grid.keys(), params)))
+            )
             if refit:
                 model.fit(X_train, y_train)
             self.best_models.append(model)
-        
+
+    def update(self, results: pd.DataFrame):
+        """
+        Updates the gridsearch object with the values in the given results dataframe.
+        :param results: The results to update with
+        """
+        self.results = results
+        self.best_params = self.results["RMSE"].groupby(level="st__horizon").idxmin()
+        self.best_score = self.esults.loc[self.best_params, "RMSE"]
+        self.best_models = []
+        for params in self.best_params:
+            model = clone(
+                self.model.set_params(**dict(zip(self.param_grid.keys(), params)))
+            )
+            self.best_models.append(model)
