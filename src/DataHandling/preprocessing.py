@@ -122,8 +122,10 @@ class SupervisedTransformer(BaseEstimator, TransformerMixin):
         predictors = X.columns
 
         for column in predictors:
+            df = pd.DataFrame(columns=[f"{column} (time {-i})" for i in shifts])
             for i in shifts:
-                X[f"{column} (time {-i})"] = X[column].shift(i)
+                df[f"{column} (time {-i})"] = X[column].shift(i)
+            X = pd.concat([X, df], axis=1)
 
         X.dropna(inplace=True)
         # drop columns of current timestep
