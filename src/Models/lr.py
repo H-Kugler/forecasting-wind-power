@@ -31,8 +31,8 @@ class Regression(Basemodel):
         """
         n_samples = X.shape[0]
         y = y.iloc[-n_samples:]
-        # check if indices match
-        assert X.index.equals(y.index), "Indices of X and y do not match."
+        # check if shapes match
+        assert X.shape[0] == y.shape[0]
 
         self.model.fit(X, y)
         return self

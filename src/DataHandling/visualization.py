@@ -78,7 +78,10 @@ def plot_corr_of_vars(
         plt.savefig(save_path)
     plt.show()
 
-def barplot_errors(df: pd.DataFrame, models: List[str], col: str, save_path: str = None):
+
+def barplot_errors(
+    df: pd.DataFrame, models: List[str], col: str, save_path: str = None
+):
     """
     Plots the error of a model.
     :param df: Dataframe containing the error
@@ -93,7 +96,9 @@ def barplot_errors(df: pd.DataFrame, models: List[str], col: str, save_path: str
         value_name="Error",
     )
     if col == "Horizon":
-        df_plot["Horizon"] = pd.Categorical(df_plot["Horizon"], categories=["10min", "Hourly", "Daily"], ordered=True)
+        df_plot["Horizon"] = pd.Categorical(
+            df_plot["Horizon"], categories=["10min", "Hourly", "Daily"], ordered=True
+        )
     sns.catplot(
         x="Metric",
         y="Error",
@@ -139,13 +144,33 @@ def scatter_plot(data, features):
     sns.pairplot(data[features], plot_kws={"s": 3})
     plt.show()
 
-def plot_gridsearch(results_df: pd.DataFrame, hue="Model__discount", col="st__horizon", row="st__window_size"):
+
+def plot_gridsearch(
+    results_df: pd.DataFrame,
+    hue="Model__discount",
+    col="st__horizon",
+    row="st__window_size",
+    sharey=False,
+    save_path=None,
+):
     """
-    Plots the results of a grid search. 
+    Plots the results of a grid search.
     """
     idx = results_df.index.names
     df = results_df.reset_index()
-    df = df.melt(id_vars=idx, value_vars=["RMSE", "MAE"], var_name="Metric", value_name="Score")
-    sns.catplot(data=df, x="Metric", y="Score", hue=hue, col=col, row=row, kind="bar")
+    df = df.melt(
+        id_vars=idx, value_vars=["RMSE", "MAE"], var_name="Metric", value_name="Score"
+    )
+    sns.catplot(
+        data=df,
+        x="Metric",
+        y="Score",
+        hue=hue,
+        col=col,
+        row=row,
+        kind="bar",
+        sharey=sharey,
+    )
+    if save_path is not None:
+        plt.savefig(save_path)
     plt.show()
-

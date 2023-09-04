@@ -32,6 +32,7 @@ class GridSearch:
         X_test: pd.DataFrame,
         y_test: pd.DataFrame,
         refit: bool = True,
+        verbose: bool = False,
     ):
         """
         Performs a grid search over the given parameter.
@@ -50,12 +51,14 @@ class GridSearch:
         results = pd.DataFrame(
             index=index, columns=["RMSE", "MAE"], dtype=float
         ).sort_index()
-        for params in self.grid:
+        for i, params in enumerate(self.grid):
             self.model.set_params(**params)
             self.model.fit(X_train, y_train)
             rmse, mae = self.model.score(X_test, y_test)
             results.loc[tuple(params.values()), "RMSE"] = rmse
             results.loc[tuple(params.values()), "MAE"] = mae
+            if i % 3 == 0 and verbose:
+                print(f"Finished {i+1} out of {len(self.grid)}")
 
         self.results = results
         self.best_params = self.results["RMSE"].groupby(level="st__horizon").idxmin()
