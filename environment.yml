@@ -13,6 +13,4 @@ dependencies:
   - bottleneck
   - dask
   - py-xgboost
-  - torchvision
   - pytorch::pytorch
-  - torchaudio
