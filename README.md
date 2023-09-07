@@ -1,7 +1,7 @@
 # Forecasting the Power output of a Wind Turbine
 
 ### Outline
-This is the final project for the Seminar _"Machine Learning in Renewable Energy Systems"_. Datasets of a British and a Brazilian wind farm were provided. The primary goal involved predicting the wind power for a minimum of one turbine from each farm for the subsequent time step, hour, and day. Additionally, participants were tasked with the selection of relevant features, either through manual or automated means. This process, along with all undertaken steps, was to be documented and explained.
+This is the final project for the Seminar *"Machine Learning in Renewable Energy Systems"*. Datasets of a British and a Brazilian wind farm were provided. The primary goal involved predicting the wind power for a minimum of one turbine from each farm for the subsequent time step, hour, and day. Additionally, participants were tasked with the selection of relevant features, either through manual or automated means. This process, along with all undertaken steps, was to be documented and explained.
 
 ## How to use this GitHub repository
 1. Clone this repository
@@ -57,7 +57,7 @@ In the following, the models are briefly described. Additionally, the results ar
 ### Moving Average
 The Moving Average Model is the simplest model implemented in this project. It is based on the assumption that the next value is the average of the last n values. Additionally, the model can be extended with a discount factor that weights the values differently. Therefore, it is really similar to the discount used in calculating future rewards in reinforcement learning. The formula for the Moving Average Model is given by:
 
-$$\hat{y}_{t+1} = \frac{1}{n} \sum_{i=0}^{n-1} \gamma^i y_{t-i}$$
+$$ \hat{y}_{t+1} = \tfrac{1}{n} \sum_{i=0}^{n-1} \gamma^i \cdot y_{t-i} $$
 
 where $\gamma$ is the discount factor and $n$ is the number of values used for the average which we call the window_size of the model. Both parameters can be set by the user. The model is implemented in the file `src/Models/ma.py`. 
 
