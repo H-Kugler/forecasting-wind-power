@@ -56,7 +56,9 @@ In the following, the models are briefly described. Additionally, the results ar
 
 ### Moving Average
 The Moving Average Model is the simplest model implemented in this project. It is based on the assumption that the next value is the average of the last n values. Additionally, the model can be extended with a discount factor that weights the values differently. Therefore, it is really similar to the discount used in calculating future rewards in reinforcement learning. The formula for the Moving Average Model is given by:
+
 $$ \hat{y}_{t+1} = \frac{1}{n} \sum_{i=0}^{n-1} \gamma^i y_{t-i} $$
+
 where $\gamma$ is the discount factor and $n$ is the number of values used for the average which we call the window_size of the model. Both parameters can be set by the user. The model is implemented in the file `src/Models/ma.py`. 
 
 **Results:**
