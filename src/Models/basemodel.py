@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from sklearn.metrics import mean_squared_error, median_absolute_error
 from sklearn.base import BaseEstimator
 
-class Basemodel(ABC, BaseEstimator):
 
+class Basemodel(ABC, BaseEstimator):
     @abstractmethod
     def fit(self, X, y):
         """
@@ -32,4 +32,3 @@ class Basemodel(ABC, BaseEstimator):
         rmse = mean_squared_error(y_true, predictions, squared=False)
         mae = median_absolute_error(y_true, predictions)
         return rmse, mae
-

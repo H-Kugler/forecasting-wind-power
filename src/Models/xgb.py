@@ -1,11 +1,9 @@
 from xgboost import XGBRegressor
 import pandas as pd
-from typing import Literal
 from src.Models.basemodel import Basemodel
 
 
 class XGB(Basemodel):
-
     def __init__(self):
         self.model = XGBRegressor()
 
@@ -16,10 +14,6 @@ class XGB(Basemodel):
         assert X.shape[0] == y.shape[0]
         self.model.fit(X, y)
         return self
-    
+
     def predict(self, X: pd.DataFrame):
         return self.model.predict(X)
-    
-
-
-        

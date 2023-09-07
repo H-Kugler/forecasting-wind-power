@@ -21,7 +21,6 @@ class Regression(Basemodel):
         self.model = model
         self.name = model
         self.alpha = alpha
-        
 
     def fit(self, X, y):
         """
@@ -44,7 +43,7 @@ class Regression(Basemodel):
         """
         predictions = self.model.predict(X)
         return predictions
-    
+
     def __setattr__(self, __name: str, __value: Any) -> None:
         if __name == "model" and isinstance(__value, str):
             if __value == "linear":
