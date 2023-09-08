@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from src.Models.basemodel import Basemodel
+from src.models.basemodel import Basemodel
 
 
 class NeuralNetwork(torch.nn.Module, Basemodel):

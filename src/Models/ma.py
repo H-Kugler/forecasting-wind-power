@@ -2,7 +2,7 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
-from src.Models.basemodel import Basemodel
+from src.models.basemodel import Basemodel
 
 
 class MovingAverage(Basemodel):

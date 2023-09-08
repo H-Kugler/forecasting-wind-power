@@ -31,4 +31,4 @@ class Basemodel(ABC, BaseEstimator):
         predictions = self.predict(X)
         rmse = mean_squared_error(y_true, predictions, squared=False)
         mae = median_absolute_error(y_true, predictions)
-        return rmse, mae
+        return -rmse, -mae

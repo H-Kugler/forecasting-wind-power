@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import StandardScaler
-from typing import Literal, Union, List, Tuple
+from typing import Any, Literal, Union, List, Tuple
 
 
 def train_test_split(
@@ -41,7 +41,7 @@ class SupervisedTransformer(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        horizon: Literal[1, 6, 144] = 1,
+        horizon: Literal["10min", "hourly", "daily"] = "10min",
         window_size: int = 1,
         encode_time: List[Literal["hour", "dayofweek", "month", "year"]] = None,
         include_past: bool = True,
@@ -151,6 +151,18 @@ class SupervisedTransformer(BaseEstimator, TransformerMixin):
         dates: pd.DatetimeIndex, feature: Literal["dayofweek", "month", "year"]
     ) -> pd.Series:
         pass
+
+    def __setattr__(self, __name: str, __value: Any) -> None:
+        if __name == "horizon" and isinstance(__value, str):
+            if __value == "10min":
+                __value = 1
+            elif __value == "hourly":
+                __value = 6
+            elif __value == "daily":
+                __value = 144
+            else:
+                raise ValueError("horizon must be one of '10min', 'hourly' or 'daily'.")
+        super().__setattr__(__name, __value)
 
 
 class DataCleaner(BaseEstimator, TransformerMixin):

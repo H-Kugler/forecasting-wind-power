@@ -2,9 +2,7 @@ from typing import Any, Literal
 import pandas as pd
 from sklearn.linear_model import Ridge, Lasso, LinearRegression
 
-from sklearn.metrics import mean_squared_error, median_absolute_error
-
-from src.Models.basemodel import Basemodel
+from src.models.basemodel import Basemodel
 
 
 class Regression(Basemodel):

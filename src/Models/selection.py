@@ -4,11 +4,15 @@ from sklearn.model_selection import ParameterGrid
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone
 
-from src.Models.basemodel import Basemodel
+from src.models.basemodel import Basemodel
 from src.utils import sort_dict
 
 
 class GridSearch:
+    """
+    WARNING: This class is deprecated. Use GridSearchCV from sklearn instead
+    """
+
     def __init__(self, model: Union[Pipeline, Basemodel], param_grid: dict):
         """
         Initializes the GridSearch object.

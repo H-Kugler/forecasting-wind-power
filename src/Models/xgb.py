@@ -1,6 +1,7 @@
 from xgboost import XGBRegressor
 import pandas as pd
-from src.Models.basemodel import Basemodel
+
+from src.models.basemodel import Basemodel
 
 
 class XGB(Basemodel):
