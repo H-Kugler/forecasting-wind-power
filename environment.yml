@@ -2,7 +2,7 @@ name: res_env
 channels:
   - defaults
 dependencies:
-  - python=3.10
+  - python=3.11
   - pandas
   - numpy
   - seaborn
