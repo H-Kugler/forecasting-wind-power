@@ -9,7 +9,7 @@ def sort_dict(d: dict):
 
 def powerset(lst):
     """
-    Returns the powerset of a list.
+    Returns the powerset of a list, but without the empty set.
     :param lst: The list to get the powerset of
     :return: The powerset of the list as a list of lists
     """
@@ -18,5 +18,9 @@ def powerset(lst):
 
     subsets = powerset(lst[:-1])
     new_subsets = [subset + [lst[-1]] for subset in subsets]
+    result = subsets + new_subsets
 
-    return subsets + new_subsets
+    # remove empty set from result
+    result.pop(0)
+
+    return result
