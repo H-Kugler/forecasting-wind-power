@@ -297,3 +297,40 @@ class Normalizer(StandardScaler):
             return X
         else:
             return X  # return unchanged data
+
+
+class FeatureSelector(BaseEstimator, TransformerMixin):
+    def __init__(self, features: List[str] = ["power"]) -> None:
+        """
+        Initializes the transformer.
+        :param features: The features to select
+        """
+        self.features = features
+
+    def fit(self, X: pd.DataFrame, y: pd.Series = None):
+        """
+        This function is called when the transformer is fitted to the data. In this case, it does nothing
+        but it is needed for compatibility with sklearn pipelines.
+        :param X: The data to fit the transformer to
+        :param y: The target variable
+        :return: self
+        """
+        return self
+
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        """
+        Selects the given features from the data.
+        :param X: The data to select the features from
+        :return: The data with the selected features
+        """
+        assert self._check_features(
+            X
+        ), "Features not in data. Please select valid data."
+        return X[self.features]
+
+    def _check_features(self, X: pd.DataFrame) -> bool:
+        """
+        Checks if the features are in the given data.
+        :param X: The data to check
+        """
+        return all(feature in X.columns for feature in self.features)
