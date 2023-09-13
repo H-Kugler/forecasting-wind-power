@@ -23,36 +23,36 @@ conda env create -f environment.yml
 │   └───Brazilian
 │       └───UEBB_v1.nc
 ├───notebooks
-│   ├───data_inspection.ipynb
-│   └───evaluation.ipynb
+│   ├───DataInspection.ipynb
+│   ├───MovingAverage.ipynb
+│   ├───RegressionVariants.ipynb
+│   ├───XGBoost.ipynb
+│   └───Evaluation.ipynb
 ├───src
 │   ├───DataHandling
-│   │   ├───__init__.py
-│   │   ├───loading.py
-│   │   ├───preprocessing.py
-│   │   └───visualization.py
 │   ├───Models
-│   │   ├───__init__.py
-│   │   ├───basemodel.py
-│   │   ├───lr.py
-│   │   ├───ma.py
-│   │   ├───nn.py
-│   │   ├───selection.py
-│   │   └───xgb.py
 │   └───utils.py
 ├───.gitignore
 ├───environment.yml
 └───README.md
 ```
-5. You should be able now to run all the notebooks.
-6. Furthermore, there is a command line interface (CLI) available. You can run it by typing
+5. You should be now able to run all the notebooks. For every examined model there is a corresponding notebook. Additionally, there is a notebook for the data inspection and one for the evaluation of the models. Please make sure that you select the correct kernel, i.e. the one from the virtual environment you created in step 2. We recommend to run the notebooks in the following order:
+    1. DataInspection.ipynb
+    2. MovingAverage.ipynb
+    3. RegressionVariants.ipynb
+    4. XGBoost.ipynb
+    5. Evaluation.ipynb
+
+Please run the cells of the corresponding order since we overwrite some variables in rare cases.
+
+<!-- 6. Furthermore, there is a command line interface (CLI) available. You can run it by typing
 ```
 conda activate res_env
 python src/main.py --help
-```
+``` -->
 
 ## Models
-In the following, the models are briefly described. Additionally, the results are presented and discussed.
+In the following, the models are briefly described. For more details, please refer to the corresponding notebooks.
 
 ### Moving Average
 The Moving Average Model is the simplest model implemented in this project. It is based on the assumption that the next value is the average of the last n values. Additionally, the model can be extended with a discount factor that weights the values differently. Therefore, it is really similar to the discount used in calculating future rewards in reinforcement learning. The formula for the Moving Average Model is given by:
@@ -61,17 +61,36 @@ $$\hat{y}_ {t+1} = \tfrac{1}{n} \sum_ {i=0}^{n-1} \gamma^i \cdot y_ {t-i}$$
 
 where $\gamma$ is the discount factor and $n$ is the number of values used for the average which we call the window_size of the model. Both parameters can be set by the user. The model is implemented in the file `src/Models/ma.py`. 
 
-**Results:**
 
+### Regression Variants
 
-### Regression
+1. Ridge Regression
 
+Ridge Regression solves the following optimization problem: 
 
-### Neural Network
+$$\min_{\omega} ||X\omega - y||_2^2 + \alpha ||\omega||_2^2$$
+
+where $X$ is the feature matrix, $y$ is the target vector, $\omega$ is the weight vector and $\alpha$ is the regularization parameter. This can be done in closed form:
+
+$$\omega = (X^TX + \alpha I)^{-1}X^Ty$$
+
+2. Kernel Ridge Regression
+
+Kernel Ridge Regression replaces the feature matrix $X$ with the kernel matrix $K$ and solves the following optimization problem:
+
+$$\min_{\omega} ||K\omega - y||_2^2 + \alpha ||\omega||_2^2$$
+
+where $K$ is the kernel matrix, $y$ is the target vector, $\omega$ is the weight vector and $\alpha$ is the regularization parameter. This can be also done in closed form:
+
+$$\omega = (K + \alpha I)^{-1}y$$
+
+Since the dimensions of the kernel matrix are too large, we use the Nyström approximation to approximate the kernel matrix.
+
 
 
 ### XGBoost
 
+## Results
 
 ## Conclusion
 --> short summary of what I did
