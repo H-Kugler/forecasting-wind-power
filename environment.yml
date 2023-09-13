@@ -2,15 +2,16 @@ name: res_env
 channels:
   - defaults
 dependencies:
-  - python=3.11
-  - pandas
+  - bottleneck
+  - ipykernel
   - numpy
   - seaborn
-  - scikit-learn
-  - ipykernel
-  - xarray
-  - netcdf4
-  - bottleneck
   - dask
+  - netcdf4
   - py-xgboost
+  - pandas
+  - scikit-learn
+  - python=3.11
   - pytorch::pytorch
+  - xarray
+  - feature_engine
