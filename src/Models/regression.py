@@ -1,11 +1,64 @@
 from typing import Any, Literal
-import pandas as pd
+
 from sklearn.linear_model import Ridge, Lasso, LinearRegression
+from sklearn.kernel_approximation import Nystroem
 
 from src.models.basemodel import Basemodel
 
 
+class RidgeRegression(Ridge, Basemodel):
+    """
+    Overwrites the fit method of the Ridge class to fit the model to the given data.
+    This is necessary as the supervised transformer which is in front of the model in our pipeline
+    gives transformations of X and y which are not of the same shape and
+    therefore not compatible with the fit method of the Ridge class.
+    All other methods are inherited from the Ridge class.
+    """
+
+    def fit(self, X, y):
+        """
+        Fits the model to the given data.
+        :param X: The input data
+        :param y: The target data
+        """
+        n_samples = X.shape[0]
+        y = y.iloc[-n_samples:]  # we have to do this because of the rolling window
+        # check if shapes match
+        assert X.shape[0] == y.shape[0]
+
+        super().fit(X, y)
+        return self
+
+
+class LassoRegression(Lasso, Basemodel):
+    """
+    Overwrites the fit method of the Lasso class to fit the model to the given data.
+    This is necessary as the supervised transformer which is in front of the model in our pipeline
+    gives transformations of X and y which are not of the same shape and
+    therefore not compatible with the fit method of the Lasso class.
+    All other methods are inherited from the Lasso class.
+    """
+
+    def fit(self, X, y):
+        """
+        Fits the model to the given data.
+        :param X: The input data
+        :param y: The target data
+        """
+        n_samples = X.shape[0]
+        y = y.iloc[-n_samples:]  # we have to do this because of the rolling window
+        # check if shapes match
+        assert X.shape[0] == y.shape[0]
+
+        super().fit(X, y)
+        return self
+
+
 class Regression(Basemodel):
+    """
+    WARNING: Deprecated class.
+    """
+
     def __init__(
         self,
         model: Literal["linear", "ridge", "lasso"] = "linear",
