@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import StandardScaler
+from feature_engine.creation import CyclicalFeatures
 from typing import Any, Literal, Union, List, Tuple
 
 
@@ -80,7 +81,6 @@ class SupervisedTransformer(BaseEstimator, TransformerMixin):
         self._reset()
         assert X.isna().sum().sum() == 0, "There are NaNs in the data."
         if y is not None and self.include_past:
-            assert y.name in X.columns, "Target variable not in data."
             self.target_var = y
             self.target_var_name = y
 
@@ -101,14 +101,22 @@ class SupervisedTransformer(BaseEstimator, TransformerMixin):
 
         data = X.copy()
 
+        if self.X_train.index.equals(data.index):
+            data = self._supervised_transform(data)
+        else:
+            data = self._supervised_transform_test(data)
+
         if self.encode_time is not None:
             for time_feature in self.encode_time:
-                data[time_feature] = self._append_time_feature(data.index, time_feature)
-
-        if self.X_train.index.equals(data.index):
-            return self._supervised_transform(data)
-        else:
-            return self._supervised_transform_test(data)
+                data = pd.concat(
+                    [
+                        data,
+                        self._get_time_feature(data.index, time_feature),
+                    ],
+                    axis=1,
+                )
+        data.index.name = "Date"
+        return data
 
     def _supervised_transform(self, X: pd.DataFrame):
         """
@@ -147,10 +155,29 @@ class SupervisedTransformer(BaseEstimator, TransformerMixin):
 
         return self._supervised_transform(X)
 
-    def _append_time_feature(
-        dates: pd.DatetimeIndex, feature: Literal["dayofweek", "month", "year"]
+    @staticmethod
+    def _get_time_feature(
+        dates: pd.DatetimeIndex, feature: Literal["hour", "dayofweek", "month", "year"]
     ) -> pd.Series:
-        pass
+        """
+        Transforms the given feature of the given dates into a cyclical feature.
+        :param dates: The dates to transform
+        :param feature: The feature to transform
+        """
+        cf = CyclicalFeatures(drop_original=True)
+        dates.name = feature
+        if feature == "hour":
+            return cf.fit_transform(pd.DataFrame(dates.hour, index=dates))
+        elif feature == "dayofweek":
+            return cf.fit_transform(pd.DataFrame(dates.dayofweek, index=dates))
+        elif feature == "month":
+            return cf.fit_transform(pd.DataFrame(dates.month, index=dates))
+        elif feature == "year":
+            return cf.fit_transform(pd.DataFrame(dates.year, index=dates))
+        else:
+            raise ValueError(
+                "feature must be one of 'hour', 'dayofweek', 'month' or 'year'."
+            )
 
     def __setattr__(self, __name: str, __value: Any) -> None:
         if __name == "horizon" and isinstance(__value, str):
@@ -167,27 +194,22 @@ class SupervisedTransformer(BaseEstimator, TransformerMixin):
 
 class DataCleaner(BaseEstimator, TransformerMixin):
     """
-    Cleans the given data.
-    Essentially, this transformer can perform all steps
-    that are described in the data inspection notebook.
+    Cleans the given data by interpolating NaNs and removing the remaining NaNs.
     """
 
     def __init__(
         self,
-        verbose: bool = False,
         features: Union[Literal["auto"], List[str]] = "auto",
         rename_features: Union[Literal[False], List[str]] = False,
-        remove_nans: bool = True,
     ):
         """
         Initializes the transformer.
-        :param verbose: Whether to print information about the cleaning process
         :param features: The features to clean
+        :param rename_features: The new names of the features
+        :param remove_nans: Whether to remove the remaining NaNs
         """
-        self.verbose = verbose
         self.features = features
         self.rename_features = rename_features
-        self.remove_nans = remove_nans
 
     def fit(self, X: pd.DataFrame, y: pd.Series = None):
         """
@@ -216,23 +238,10 @@ class DataCleaner(BaseEstimator, TransformerMixin):
         :param X: The data to clean
         :return: The cleaned data
         """
-        if self.remove_nans:
-            X = self._remove_nans(X, interpolation="linear")
+        X = X.interpolate(method="linear")
+        X.dropna(inplace=True)
         if isinstance(self.rename_features, list):
             X = self._rename_columns(X, self.rename_features)
-        return X
-
-    def _remove_nans(
-        self, X: pd.DataFrame, interpolation: str = "linear"
-    ) -> pd.DataFrame:
-        """
-        Removes NaNs from the given data.
-        :param X: The data to remove NaNs from
-        :param interpolation: The interpolation method to use
-        :return: The data without NaNs
-        """
-        X = X.interpolate(method=interpolation)
-        X.dropna(inplace=True)
         return X
 
     def _select_features(self, X: pd.DataFrame, thresh: float = 0.7) -> pd.DataFrame:
