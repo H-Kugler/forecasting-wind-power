@@ -2,8 +2,10 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
+from sklearn.base import BaseEstimator
 
-class MovingAverage:
+
+class MovingAverage(BaseEstimator):
     def __init__(
         self,
         discount: float = 1.0,
