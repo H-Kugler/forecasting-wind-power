@@ -2,10 +2,8 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
-from src.models.basemodel import Basemodel
 
-
-class MovingAverage(Basemodel):
+class MovingAverage:
     def __init__(
         self,
         discount: float = 1.0,

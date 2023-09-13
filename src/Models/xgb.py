@@ -1,10 +1,8 @@
 from xgboost import XGBRegressor
 import pandas as pd
 
-from src.models.basemodel import Basemodel
 
-
-class XGB(Basemodel):
+class XGB:
     def __init__(self):
         self.model = XGBRegressor()
 

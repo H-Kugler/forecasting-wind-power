@@ -3,10 +3,8 @@ from typing import Any, Literal
 from sklearn.linear_model import Ridge, Lasso, LinearRegression
 from sklearn.kernel_approximation import Nystroem
 
-from src.models.basemodel import Basemodel
 
-
-class RidgeRegression(Ridge, Basemodel):
+class RidgeRegression(Ridge):
     """
     Overwrites the fit method of the Ridge class to fit the model to the given data.
     This is necessary as the supervised transformer which is in front of the model in our pipeline
@@ -30,7 +28,7 @@ class RidgeRegression(Ridge, Basemodel):
         return self
 
 
-class LassoRegression(Lasso, Basemodel):
+class LassoRegression(Lasso):
     """
     Overwrites the fit method of the Lasso class to fit the model to the given data.
     This is necessary as the supervised transformer which is in front of the model in our pipeline
@@ -54,7 +52,7 @@ class LassoRegression(Lasso, Basemodel):
         return self
 
 
-class Regression(Basemodel):
+class Regression:
     """
     WARNING: Deprecated class.
     """
