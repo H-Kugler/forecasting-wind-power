@@ -51,6 +51,7 @@ def plot_gridsearch_results(
     x: str,
     hue: str = None,
     col="param_st__horizon",
+    benchmarks: list = None,
     save_path: str = None,
 ):
     """
@@ -69,16 +70,22 @@ def plot_gridsearch_results(
         var_name="split",
         value_name="RMSE",
     )
-    plot = sns.catplot(
+    g = sns.catplot(
         data=df,
         x=x,
         y="RMSE",
         hue=hue,
         col=col,
         kind="bar",
+        palette=sns.color_palette("Set2"),
     )
-    plot.fig.subplots_adjust(top=0.9)
-    plot.fig.suptitle("RMSE for different hyperparameter settings")
+    g.fig.subplots_adjust(top=0.9)
+    g.fig.suptitle("RMSE for different hyperparameter settings")
+
+    if benchmarks is not None:
+        # add horizontal lines with the benchmarks
+        for i, ax in enumerate(g.axes.flat):
+            ax.axhline(benchmarks[i], ls="--", color="black")
     if save_path is not None:
         plt.savefig(save_path)
     plt.show()
