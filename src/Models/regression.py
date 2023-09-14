@@ -1,7 +1,5 @@
 from typing import Any, Literal
-
 from sklearn.linear_model import Ridge, Lasso, LinearRegression
-from sklearn.kernel_approximation import Nystroem
 
 
 class RidgeRegression(Ridge):
