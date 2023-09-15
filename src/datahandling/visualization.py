@@ -6,7 +6,7 @@ from typing import List, Union, Tuple
 
 
 def plot_predictions(
-    predictions: pd.DataFrame, y_true: pd.Series, save_path: str = None
+    predictions: pd.DataFrame, y_true: pd.Series = None, save_path: str = None
 ):
     """
     Plot predictions for each horizon in predictions.
@@ -57,6 +57,11 @@ def plot_gridsearch_results(
     """
     Plot the results of a gridsearch in a barplot.
     :param df: Gridsearch results in a dataframe
+    :param x: Column to plot on the x-axis
+    :param hue: Column to plot as different colors
+    :param col: Column to plot as different subplots
+    :param benchmarks: List of benchmarks to plot as horizontal lines
+    :param save_path: Path to save the plot
     """
     # extract the columns that store the parameters of the model
     params = df.columns[df.columns.str.contains("param_")]

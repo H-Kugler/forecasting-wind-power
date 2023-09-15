@@ -10,6 +10,10 @@ class MovingAverage(BaseEstimator):
         self,
         discount: float = 1.0,
     ):
+        """
+        Initializes the model.
+        :param discount: Discount factor for the moving average
+        """
         self.discount = discount
 
     def fit(self, X: pd.DataFrame, y: Union[pd.Series, str]):
