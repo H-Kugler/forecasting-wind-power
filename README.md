@@ -38,11 +38,11 @@ conda env create -f environment.yml
 
 Each notebook is self-contained, allowing you to execute it independently without relying on the others. However, there are references within them. Therefore, we advise running the notebooks in the suggested sequence:
 
-    1. _DataInspection.ipynb_
-    2. _MovingAverage.ipynb_
-    3. _RegressionVariants.ipynb_
-    4. _XGBoost.ipynb_
-    5. _Evaluation.ipynb_
+1. _DataInspection.ipynb_
+2. _MovingAverage.ipynb_
+3. _RegressionVariants.ipynb_
+4. _XGBoost.ipynb_
+5. _Evaluation.ipynb_
 
 Please run the cells of the respective notebooks in the corresponding order since we overwrite some variables in rare cases.
 
@@ -55,48 +55,44 @@ Overall, we examine four different models within this project:
 3. _Kernel Ridge Regression_ (kernel)
 4. _XGBoost Regression_ (xgb)
 
-<p>For a detailed description of the models please refer to the corresponding notebooks, where hyperparameter tuning, forecasting performance and the transfer learning challenge are discussed. <br>
-Please find the implementation of the models in the src/models folder. <br>
-All models are implemented according to the BaseEstimator class of sklearn. This design enables efficient hyperparameter tuning through the use of GridSearchCV and RandomizedSearchCV. <br>
-In each case we discuss, it is essential to apply one or more transformations to the time series data. The classes responsible for these transformations can be found in the src/datahandling/preprocessing.py. Importantly, these transformation classes are also compatible with sklearn, making them suitable for integration into a pipeline. You can find a short overview of the transformers at the end of the _DataInspection.ipynb_ notebook. </p>
+For a detailed description of the models please refer to the corresponding notebooks, where hyperparameter tuning, forecasting performance and the transfer learning challenge are discussed. 
+Please find the implementation of the models in the src/models folder.
+
+All models are implemented according to the BaseEstimator class of sklearn. This design enables efficient hyperparameter tuning through the use of GridSearchCV and RandomizedSearchCV.
+
+In each case we discuss, it is essential to apply one or more transformations to the time series data. The classes responsible for these transformations can be found in the src/datahandling/preprocessing.py. Importantly, these transformation classes are also compatible with sklearn, making them suitable for integration into a pipeline. You can find a short overview of the transformers at the end of the data inspection notebook.
 
 ## Results
 
+This section provides a concise summary of the results. For more comprehensive information, please consult the evaluation notebook and the individual notebooks for each respective model.
+
 ### British Wind Farm 
 
-<div style="width:80px ; height:40px">
-![Overall results of the British wind farm](figures/res_brit_overall.png "Overall results of the British wind farm")
-<div>
+The following plot shows the performance with respect to the mean averager error (MAE) and the root mean squared error (RMSE). The dashed lines in each subplot present the benchmarks given for this particular setting.
+
+![Overall results of the British wind farm](figures/res_brit_overall.png)
 
 Employing the models on the British wind farm is successful. Most models show superior performance compared to both of the benchmarks, with the exception being the _Moving Average_ model, which falls short when it comes to daily forecasting. 
 The following plot shows the forecast of the _Ridge Regression_ model of the first 1000 values in the test period against the true values:
 
-<div style="width:80px ; height:40px">
-![Forecasting performance of the British wind farm](figures/forecast_brit.png "Forecasting performance of the _Ridge Regression_ model on the British wind farm")
-<div>
+![Forecasting performance of the _Ridge Regression_ model on the British wind farm](figures/forecast_brit.png)
 
 ### Brazilian Wind Farm
 
-<div style="width:80px ; height:40px">
-![Results of the Brazilian wind farm](figures/res_braz_overall.png "Overall results of the Brazilian wind farm")
-<div>
+The following plot shows the performance with respect to the mean averager error (MAE) and the root mean squared error (RMSE). The dashed lines in each subplot present the benchmarks given for this particular setting.
+
+![Overall results of the Brazilian wind farm](figures/res_braz_overall.png)
 
 For the Brazilian wind farm, the results are mixed. Only the _XGB_ model is able to outperform the benchmarks across several tasks.
 The following plot shows the forecast of the _XGB_ model of the first 1000 values in the test period against the true values:
 
-<div style="width:80px ; height:40px">
-![Forecasting performance of the Brazilian wind farm](figures/forecast_braz.png "Forecasting performance of the _XGB_ model on the Brazilian wind farm")
-<div>
-
-
+![Forecasting performance of the _XGB_ model on the Brazilian wind farm](figures/forecast_braz.png)
 
 ### Transfer Learning Challenge
 
 All the models achieve good results when applying normalization to all variables (target and predictors). As an example we show the forecasting performance of the _Ridge Regression_ model on the British wind farm when trained on the Brazilian wind farm. For a further discussion of the results please refer to the corresponing section in the notebooks.
 
-<div style="width:80px ; height:40px">
-![Results of the transfer learning challenge](figures/transfer_challenge.png "Results of the transfer learning challenge")
-<div>
+![Results of the transfer learning challenge](figures/transfer_challenge.png)
 
 ## Conclusion
 
