@@ -1,4 +1,4 @@
-# Forecasting the Power output of a Wind Turbine
+# Forecasting the Power Output of a Wind Turbine
 
 ### Outline
 This is the final project for the seminar __"Machine Learning in Renewable Energy Systems"__. Datasets of a British and a Brazilian wind farm were provided. The primary goal involved predicting the wind power for a minimum of one turbine from each farm for the subsequent time step (10 min), hour, and day. Additionally, participants were tasked with the selection of relevant features, either through manual or automated means. This process, along with all undertaken steps, was to be documented and explained.
