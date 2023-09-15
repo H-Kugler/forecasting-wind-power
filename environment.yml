@@ -8,10 +8,11 @@ dependencies:
   - seaborn
   - dask
   - netcdf4
-  - py-xgboost
   - pandas
   - scikit-learn
   - python=3.11
-  - pytorch::pytorch
   - xarray
-  - feature_engine
+  - pip
+  - pip:
+    - xgboost==0.90
+    - feature_engine
