@@ -1,7 +1,7 @@
 # Forecasting the Power output of a Wind Turbine
 
 ### Outline
-This is the final project for the Seminar *"Machine Learning in Renewable Energy Systems"*. Datasets of a British and a Brazilian wind farm were provided. The primary goal involved predicting the wind power for a minimum of one turbine from each farm for the subsequent time step, hour, and day. Additionally, participants were tasked with the selection of relevant features, either through manual or automated means. This process, along with all undertaken steps, was to be documented and explained.
+This is the final project for the Seminar _"Machine Learning in Renewable Energy Systems"_. Datasets of a British and a Brazilian wind farm were provided. The primary goal involved predicting the wind power for a minimum of one turbine from each farm for the subsequent time step, hour, and day. Additionally, participants were tasked with the selection of relevant features, either through manual or automated means. This process, along with all undertaken steps, was to be documented and explained.
 
 ## How to use this GitHub repository
 1. Clone this repository
@@ -21,6 +21,7 @@ conda env create -f environment.yml
 │   │   ├───Kelmarsh_SCADA_2020_3086
 │   │   └───Kelmarsh_SCADA_2021_3087
 │   └───Brazilian
+│       ├───UEPS_v1.nc
 │       └───UEBB_v1.nc
 ├───notebooks
 │   ├───DataInspection.ipynb
@@ -29,73 +30,41 @@ conda env create -f environment.yml
 │   ├───XGBoost.ipynb
 │   └───Evaluation.ipynb
 ├───src
-│   ├───DataHandling
-│   ├───Models
-│   └───utils.py
 ├───.gitignore
 ├───environment.yml
 └───README.md
 ```
-5. You should be now able to run all the notebooks. For every examined model there is a corresponding notebook. Additionally, there is a notebook for the data inspection and one for the evaluation of the models. Please make sure that you select the correct kernel, i.e. the one from the virtual environment you created in step 2. We recommend to run the notebooks in the following order:
-    1. DataInspection.ipynb
-    2. MovingAverage.ipynb
-    3. RegressionVariants.ipynb
-    4. XGBoost.ipynb
-    5. Evaluation.ipynb
+5. You should now be able to run all the notebooks. For every examined model there is a corresponding notebook. Additionally, there is a notebook for the data inspection and one for the evaluation of the models. Please make sure that you select the correct kernel, i.e. the one from the virtual environment you created in step 2. Each notebook is self-contained, allowing you to execute it independently without relying on the others. However, there are references within them. Therefore, we advise running the notebooks in the suggested sequence:
 
-Please run the cells of the corresponding order since we overwrite some variables in rare cases.
+    1. _DataInspection.ipynb_
+    2. _MovingAverage.ipynb_
+    3. _RegressionVariants.ipynb_
+    4. _XGBoost.ipynb_
+    5. _Evaluation.ipynb_
 
-<!-- 6. Furthermore, there is a command line interface (CLI) available. You can run it by typing
-```
-conda activate res_env
-python src/main.py --help
-``` -->
+Please run the cells of the respective notebooks in the corresponding order since we overwrite some variables in rare cases.
 
 ## Models
-In the following, the models are briefly described. For more details, please refer to the corresponding notebooks.
 
-### Moving Average
-The Moving Average Model is the simplest model implemented in this project. It is based on the assumption that the next value is the average of the last n values. Additionally, the model can be extended with a discount factor that weights the values differently. Therefore, it is really similar to the discount used in calculating future rewards in reinforcement learning. The formula for the Moving Average Model is given by:
+Overall, we examine four different models within this project:
 
-$$\hat{y}_ {t+1} = \tfrac{1}{n} \sum_ {i=0}^{n-1} \gamma^i \cdot y_ {t-i}$$
+1. _Moving Average_ (ma)
+2. _Ridge Regression_ (rr)
+3. _Kernel Ridge Regression_ (kernel)
+4. _XGBoost Regression_ (xgb)
 
-where $\gamma$ is the discount factor and $n$ is the number of values used for the average which we call the window_size of the model. Both parameters can be set by the user. The model is implemented in the file `src/Models/ma.py`. 
-
-
-### Regression Variants
-
-1. Ridge Regression
-
-Ridge Regression solves the following optimization problem: 
-
-$$\min_{\omega} ||X\omega - y||_2^2 + \alpha ||\omega||_2^2$$
-
-where $X$ is the feature matrix, $y$ is the target vector, $\omega$ is the weight vector and $\alpha$ is the regularization parameter. This can be done in closed form:
-
-$$\omega = (X^TX + \alpha I)^{-1}X^Ty$$
-
-2. Kernel Ridge Regression
-
-Kernel Ridge Regression replaces the feature matrix $X$ with the kernel matrix $K$ and solves the following optimization problem:
-
-$$\min_{\omega} ||K\omega - y||_2^2 + \alpha ||\omega||_2^2$$
-
-where $K$ is the kernel matrix, $y$ is the target vector, $\omega$ is the weight vector and $\alpha$ is the regularization parameter. This can be also done in closed form:
-
-$$\omega = (K + \alpha I)^{-1}y$$
-
-Since the dimensions of the kernel matrix are too large, we use the Nyström approximation to approximate the kernel matrix.
-
-
-
-### XGBoost
+For a detailed description of the models please refer to the corresponding notebooks, where hyperparameter tuning, forecasting performance and the transfer learning challenge are discussed.
+Please find the implementation of the models in the src/models folder.
+All models are implemented according to the BaseEstimator class of sklearn. This design enables efficient hyperparameter tuning through the use of GridSearchCV and RandomizedSearchCV.
+In each case we discuss, it is essential to apply one or more transformations to the time series data. The classes responsible for these transformations can be found in the src/datahandling/preprocessing.py. Importantly, these transformation classes are compatible with sklearn, making them suitable for integration into a pipeline. You can find a short description of the transformers at the end of the _DataInspection.ipynb_ notebook.
 
 ## Results
 
+### British Wind Farm 
+
+![alt text](figures/res_brit_overall.png, "Overall results for the British wind farm")
+
 ## Conclusion
---> short summary of what I did
---> best model is... because
---> Possible steps to improve results
 
 ### References
 --> add references
