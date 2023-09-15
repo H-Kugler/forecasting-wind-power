@@ -68,7 +68,7 @@ This section provides a concise summary of the results. For more comprehensive i
 
 ### British Wind Farm 
 
-The following plot shows the performance with respect to the mean averager error (MAE) and the root mean squared error (RMSE). The dashed lines in each subplot present the benchmarks given for this particular setting.
+The following plot shows the performance with respect to the mean average error (MAE) and the root mean squared error (RMSE). The dashed lines in each subplot present the benchmarks given for this particular setting.
 
 ![Overall results of the British wind farm](figures/res_brit_overall.png)
 
@@ -79,7 +79,7 @@ The following plot shows the forecast of the _Ridge Regression_ model of the fir
 
 ### Brazilian Wind Farm
 
-The following plot shows the performance with respect to the mean averager error (MAE) and the root mean squared error (RMSE). The dashed lines in each subplot present the benchmarks given for this particular setting.
+The following plot shows the performance with respect to the mean average error (MAE) and the root mean squared error (RMSE). The dashed lines in each subplot present the benchmarks given for this particular setting.
 
 ![Overall results of the Brazilian wind farm](figures/res_braz_overall.png)
 
@@ -103,7 +103,7 @@ Note hat in this project, our focus is solely on the examination of supervised l
 Moreover, a more comprehensive investigation into the hyperparameter space of computationally intensive models such as _XGB_ and _Kernel Ridge Regression_ could be conducted, leveraging additional computational resources. This could potentially lead to improved outcomes.
 
 ### References
-- Harris, C.R., Millman, K.J., van der Walt, S.J. et al. Array programming with NumPy. Nature 585, 357–362 (2020). DOI: 10.1038/s41586-020-2649-2.
+- Harris, C.R., Millman, K.J., van der Walt, S.J. et al. Array programming with NumPy. Nature 585, 357–362 (2020). DOI: [10.1038/s41586-020-2649-2](https://www.nature.com/articles/s41586-020-2649-2).
 - The pandas development team. (2023). pandas-dev/pandas: Pandas (v2.1.0). Zenodo. https://doi.org/10.5281/zenodo.8301632
 - Chen, T. & Guestrin, C., 2016. XGBoost: A Scalable Tree Boosting System. In Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining. KDD &#x27;16. New York, NY, USA: ACM, pp. 785–794. Available at: http://doi.acm.org/10.1145/2939672.2939785.
 - Pedregosa, F. et al., 2011. Scikit-learn: Machine Learning in Python. Journal of Machine Learning Research, 12, pp. 2825–2830.
